@@ -20,9 +20,9 @@ function moveFile() {
     return;
   }
 
-  const isExistDirectory = fs.existsSync(destination);
+  const destinationExists = fs.existsSync(destination);
 
-  if (isExistDirectory) {
+  if (destinationExists) {
     const destStat = fs.statSync(destination);
 
     const newDestPath = destStat.isDirectory()
@@ -38,10 +38,25 @@ function moveFile() {
     return;
   }
 
-  fs.rename(source, destination, (err) => {
-    if (err) {
-      console.error(err);
+  fs.copyFile(source, destination, (copyErr) => {
+    if (copyErr) {
+      console.error('Error during copying:', copyErr.message);
+
+      return;
     }
+
+    fs.unlink(source, (unlinkErr) => {
+      if (unlinkErr) {
+        console.error(
+          'Error during deletion of source file:',
+          unlinkErr.message,
+        );
+
+        return;
+      }
+
+      console.log('File successfully moved!');
+    });
   });
 }
 
